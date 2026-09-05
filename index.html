@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Idiot Game (Simple)</title>
+<title>Updated Idiot Game</title>
+
 <style>
   body {
     margin: 0;
@@ -12,7 +13,7 @@
     font-family: Arial;
   }
 
-  #start {
+  #startScreen {
     position: fixed;
     inset: 0;
     display: flex;
@@ -22,9 +23,9 @@
     z-index: 2000;
   }
 
-  #start button {
-    padding: 12px 24px;
-    font-size: 24px;
+  #startScreen button {
+    padding: 14px 28px;
+    font-size: 26px;
     cursor: pointer;
   }
 
@@ -35,7 +36,7 @@
     height: 100%;
     object-fit: cover;
     display: none;
-    z-index: 1000;
+    z-index: 1500;
   }
 
   #message {
@@ -44,9 +45,9 @@
     display: none;
     justify-content: center;
     align-items: center;
-    font-size: 40px;
+    font-size: 48px;
     background: black;
-    z-index: 1500;
+    z-index: 1600;
   }
 
   #face {
@@ -59,9 +60,10 @@
   }
 
   #faceBox {
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
     background: red;
+    border-radius: 50%;
   }
 
   #hud {
@@ -104,6 +106,8 @@
     box-shadow: 0 0 20px black;
     padding: 10px;
     z-index: 800;
+    color: white;
+    font-size: 18px;
   }
 
   #endScreen {
@@ -114,14 +118,14 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    font-size: 40px;
+    font-size: 48px;
     z-index: 2000;
   }
 </style>
 </head>
 <body>
 
-<div id="start">
+<div id="startScreen">
   <button id="startBtn">Run Application</button>
 </div>
 
@@ -152,7 +156,7 @@ let timeLeft = 60;
 let coins = 0;
 let spawning = false;
 
-const start = document.getElementById("start");
+const startScreen = document.getElementById("startScreen");
 const startBtn = document.getElementById("startBtn");
 const video = document.getElementById("ransomVideo");
 const audio = document.getElementById("ransomAudio");
@@ -161,11 +165,9 @@ const files = document.getElementById("files");
 const endScreen = document.getElementById("endScreen");
 
 startBtn.onclick = () => {
-  start.style.display = "none";
+  startScreen.style.display = "none";
   video.style.display = "block";
-  video.play().catch(() => {
-    // If autoplay fails, user can press play manually
-  });
+  video.play();
 };
 
 video.onended = () => {
@@ -186,7 +188,6 @@ document.addEventListener("mousemove", () => {
 function startMinigame() {
   spawning = true;
 
-  // Timer
   setInterval(() => {
     timeLeft--;
     document.getElementById("time").textContent = timeLeft;
@@ -195,7 +196,6 @@ function startMinigame() {
     }
   }, 1000);
 
-  // Popups (text only)
   let popupInterval = setInterval(() => {
     if (!spawning) return;
 
@@ -216,7 +216,6 @@ function startMinigame() {
     clearInterval(popupInterval);
   }, 30000);
 
-  // Coins
   setInterval(() => {
     const coin = document.createElement("div");
     coin.className = "file";
