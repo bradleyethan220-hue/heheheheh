@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Idiot Game</title>
+
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: white;
+    overflow: hidden;
+    font-family: Arial;
+  }
+
+  /* FULLSCREEN VIDEO */
+  #ransomVideo {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+    z-index: 1000;
+  }
+
+  /* MESSAGE AFTER VIDEO */
+  #message {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+    background: black;
+    z-index: 1500;
+  }
+
+  /* FACE */
+  #face {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+  }
+
+  #face img {
+    width: 400px;
+    transition: 0.1s;
+  }
+
+  /* HUD */
+  #hud {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 600;
+  }
+
+  /* FAKE FILE EXPLORER */
+  #explorer {
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    width: 260px;
+    height: 400px;
+    background: #111;
+    border: 2px solid #333;
+    padding: 10px;
+    overflow-y: auto;
+    z-index: 600;
+  }
+
+  .file {
+    background: #222;
+    padding: 8px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+  }
+
+  /* POPUPS */
+  .popup {
+    position: absolute;
+    width: 220px;
+    height: 140px;
+    background: #111;
+    border: 2px solid red;
+    border-radius: 6px;
+    box-shadow: 0 0 20px black;
+    padding: 0;
+    z-index: 800;
+  }
+
+  .popup img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* END SCREEN */
+  #endScreen {
+    position: fixed;
+    inset: 0;
+    background: black;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-size: 48px;
+    z-index: 2000;
+  }
+</style>
+</head>
+<body>
+
+<!-- YOUR REAL VIDEO -->
+<video id="ransomVideo" src="ransom appears.mp4"></video>
+
+<!-- YOUR REAL AUDIO -->
+<audio id="ransomAudio" src="ransom appears.mp3"></audio>
+
+<!-- MESSAGE -->
+<div id="message">Awh, you beat me!</div>
+
+<!-- FACE -->
+<div id="face">
+  <img id="faceImg" src="faces/calm.png">
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  Time: <span id="time">60</span>s<br>
+  Coins: <span id="coins">0</span>
+</div>
+
+<!-- FAKE FILE EXPLORER -->
+<div id="explorer">
+  <h2>Files</h2>
+  <div id="files"></div>
+</div>
+
+<!-- END SCREEN -->
+<div id="endScreen">Thank You</div>
+
+<script>
+/* -------------------------
+   VARIABLES
+--------------------------*/
+let ransomFinished = false;
+let timeLeft = 60;
+let coins = 0;
+let spawning = false;
+
+/* -------------------------
+   ELEMENTS
+--------------------------*/
+const video = document.getElementById("ransomVideo");
+const audio = document.getElementById("ransomAudio");
+const message = document.getElementById("message");
+const faceImg = document.getElementById("faceImg");
+const files = document.getElementById("files");
+const endScreen = document.getElementById("endScreen");
+
+/* -------------------------
+   PLAY YOUR REAL VIDEO
+--------------------------*/
+video.style.display = "block";
+video.play();
+
+/* -------------------------
+   WHEN VIDEO ENDS
+--------------------------*/
+video.onended = () => {
+  video.style.display = "none";
+  message.style.display = "flex";
+  ransomFinished = true;
+};
+
+/* -------------------------
+   MOUSE MOVEMENT → MINIGAME
+--------------------------*/
+document.addEventListener("mousemove", () => {
+  if (!ransomFinished) return;
+
+  // Remove message
+  message.style.display = "none";
+
+  // Switch face
+  faceImg.src = "faces/scream.png";
+
+  // Play scream audio
+  audio.play();
+
+  // Start minigame
+  startMinigame();
+
+  ransomFinished = false;
+});
+
+/* -------------------------
+   MINIGAME START
+--------------------------*/
+function startMinigame() {
+  spawning = true;
+
+  // Timer
+  setInterval(() => {
+    timeLeft--;
+    document.getElementById("time").textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      endScreen.style.display = "flex";
+    }
+  }, 1000);
+
+  // Popups
+  const popupFaces = [
+    "faces/popup1.png",
+    "faces/popup2.png",
+    "faces/popup3.png",
+    "faces/popup4.png"
+  ];
+
+  let popupInterval = setInterval(() => {
+    if (!spawning) return;
+
+    const p = document.createElement("div");
+    p.className = "popup";
+
+    const img = document.createElement("img");
+    img.src = popupFaces[Math.floor(Math.random() * popupFaces.length)];
+
+    p.appendChild(img);
+
+    p.style.left = Math.random() * (window.innerWidth - 240) + "px";
+    p.style.top = Math.random() * (window.innerHeight - 160) + "px";
+
+    p.onclick = () => p.remove();
+
+    document.body.appendChild(p);
+  }, 600);
+
+  // Stop spawning after 30 seconds
+  setTimeout(() => {
+    spawning = false;
+    clearInterval(popupInterval);
+  }, 30000);
+
+  // Coins
+  setInterval(() => {
+    const coin = document.createElement("div");
+    coin.className = "file";
+    coin.textContent = "Coin_" + Math.floor(Math.random() * 9999);
+    files.appendChild(coin);
+    coins++;
+    document.getElementById("coins").textContent = coins;
+  }, 1500);
+}
+</script>
+
+</body>
+</html>
